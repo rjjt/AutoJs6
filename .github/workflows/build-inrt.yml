@@ -3,11 +3,6 @@ name: Build Inrt APK (QQ Invite)
 on:
   push:
     branches: [master, main]
-    paths:
-      - 'app/src/main/assets-inrt/project/**'
-      - 'app/build.gradle.kts'
-      - '.github/workflows/build-inrt.yml'
-      - 'version.properties'
   workflow_dispatch:
 
 permissions:
