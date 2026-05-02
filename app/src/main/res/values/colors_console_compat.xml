@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Compatibility shim: bottom_sheet_log.xml references @color/console_debug and
+  @color/console_verbose without `_view_` infix, but only console_view_* names
+  exist in colors.xml. Without these aliases the inrt build fails resource linking.
+  Values mirror the matching console_view_* shades.
+-->
+<resources>
+    <color name="console_debug">#111214</color>
+    <color name="console_verbose">#BDBDBD</color>
+</resources>
