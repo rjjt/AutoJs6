@@ -1,0 +1,87 @@
+name: Build Inrt APK (QQ Invite)
+
+on:
+  push:
+    branches: [master, main]
+    paths:
+      - 'app/src/main/assets-inrt/project/**'
+      - 'app/build.gradle.kts'
+      - '.github/workflows/build-inrt.yml'
+      - 'version.properties'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: gradle
+
+      - name: Install CMake 3.10.2
+        run: |
+          wget -q https://cmake.org/files/v3.10/cmake-3.10.2-Linux-x86_64.sh
+          chmod +x cmake-3.10.2-Linux-x86_64.sh
+          sudo ./cmake-3.10.2-Linux-x86_64.sh --skip-license --prefix=/usr/local
+
+      - name: Install Ninja
+        run: sudo apt-get update && sudo apt-get install -y ninja-build
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Show project metadata
+        run: |
+          echo "=== project.json ==="
+          cat app/src/main/assets-inrt/project/project.json
+          echo "=== embedded scripts ==="
+          find app/src/main/assets-inrt/project -type f | sort
+
+      - name: Build Inrt Debug APK
+        run: ./gradlew :app:assembleInrtDebug --no-daemon --stacktrace
+
+      - name: Locate APK
+        id: locate
+        run: |
+          set -e
+          APK=$(find app/build/outputs/apk/inrt -name "*.apk" | head -n1)
+          if [ -z "$APK" ]; then
+            echo "No APK produced!"
+            find app/build/outputs/apk -type f
+            exit 1
+          fi
+          echo "Found APK: $APK"
+          echo "apk=$APK" >> "$GITHUB_OUTPUT"
+          NEW="模拟拉人-debug-build${{ github.run_number }}.apk"
+          cp "$APK" "$NEW"
+          echo "renamed=$NEW" >> "$GITHUB_OUTPUT"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: 模拟拉人-apk-build${{ github.run_number }}
+          path: ${{ steps.locate.outputs.renamed }}
+          if-no-files-found: error
+
+      - name: Create Release
+        if: github.event_name == 'push'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: build-${{ github.run_number }}
+          name: 模拟拉人 build ${{ github.run_number }}
+          files: ${{ steps.locate.outputs.renamed }}
+          generate_release_notes: false
+          body: |
+            自动构建：commit ${{ github.sha }}
+            构建号：${{ github.run_number }}
+            分支：${{ github.ref_name }}
