@@ -42,22 +42,45 @@ jobs:
           echo "=== embedded scripts ==="
           find app/src/main/assets-inrt/project -type f | sort
 
-      - name: Build Inrt Debug APK
-        run: ./gradlew :app:assembleInrtDebug --no-daemon --stacktrace
+      - name: Build Inrt Release APK
+        run: ./gradlew assembleInrtRelease
+
+      - name: Sign APK with debug key (no release keystore configured)
+        run: |
+          set -e
+          # Find the unsigned APK(s)
+          mapfile -t APKS < <(find app/build/outputs/apk/inrt/release -name "*.apk")
+          if [ ${#APKS[@]} -eq 0 ]; then
+            echo "No APK produced. Listing build outputs:"
+            find app/build/outputs/apk -type f
+            exit 1
+          fi
+          # Generate a debug keystore on the fly
+          KEYSTORE="$HOME/qqinvite-debug.keystore"
+          keytool -genkeypair -v -keystore "$KEYSTORE" \
+            -keyalg RSA -keysize 2048 -validity 10000 \
+            -alias qqinvite -storepass android -keypass android \
+            -dname "CN=qqinvite, OU=DEV, O=qqinvite, L=NA, S=NA, C=US"
+          # Locate apksigner from the latest installed build-tools
+          BT=$(ls -1 "$ANDROID_SDK_ROOT/build-tools" | sort -V | tail -n1)
+          APKSIGNER="$ANDROID_SDK_ROOT/build-tools/$BT/apksigner"
+          for APK in "${APKS[@]}"; do
+            echo "Signing $APK"
+            "$APKSIGNER" sign --ks "$KEYSTORE" --ks-pass pass:android \
+              --key-pass pass:android --ks-key-alias qqinvite "$APK"
+          done
 
       - name: Locate APK
         id: locate
         run: |
           set -e
-          APK=$(find app/build/outputs/apk/inrt -name "*.apk" | head -n1)
+          APK=$(find app/build/outputs/apk/inrt/release -name "*.apk" | head -n1)
           if [ -z "$APK" ]; then
-            echo "No APK produced!"
-            find app/build/outputs/apk -type f
+            echo "No APK after signing!"
             exit 1
           fi
           echo "Found APK: $APK"
-          echo "apk=$APK" >> "$GITHUB_OUTPUT"
-          NEW="模拟拉人-debug-build${{ github.run_number }}.apk"
+          NEW="模拟拉人-build${{ github.run_number }}.apk"
           cp "$APK" "$NEW"
           echo "renamed=$NEW" >> "$GITHUB_OUTPUT"
 
