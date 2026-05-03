@@ -1,7 +1,7 @@
-const storage = require("./storage.js");
-const anti = require("./anti.js");
-const nav = require("./nav.js");
-const select = require("./select.js");
+const Storage = require("./Storage.js");
+const Anti = require("./Anti.js");
+const Nav = require("./Nav.js");
+const Select = require("./Select.js");
 
 const STATE = { IDLE: "IDLE", RUNNING: "RUNNING", PAUSED: "PAUSED", STOPPED: "STOPPED" };
 
@@ -30,7 +30,7 @@ function _emitProgress(count, limit) {
 
 function _log(msg) {
     console.log(msg);
-    storage.pushLog(msg);
+    Storage.pushLog(msg);
     if (_floatingHooks && _floatingHooks.onLog) {
         try { _floatingHooks.onLog(msg); } catch (e) {}
     }
@@ -64,15 +64,15 @@ function lastError() { return _lastError; }
 
 function _runLoop() {
     try {
-        const cfg = storage.loadConfig();
+        const cfg = Storage.loadConfig();
         if (!cfg.sourceGroup) throw new Error("未设置源群名称");
         if (!cfg.targetGroups || cfg.targetGroups.length === 0) {
             throw new Error("未设置目标群（至少一个）");
         }
 
-        _emitProgress(storage.getTodayCount(), cfg.dailyLimit);
+        _emitProgress(Storage.getTodayCount(), cfg.dailyLimit);
 
-        if (anti.isQuietNow(cfg)) {
+        if (Anti.isQuietNow(cfg)) {
             _log("当前在凌晨保护时段，不运行");
             _setState(STATE.IDLE);
             return;
@@ -83,11 +83,11 @@ function _runLoop() {
             while (_state === STATE.PAUSED) sleep(500);
             if (_state === STATE.STOPPED) break;
 
-            if (storage.getTodayCount() >= cfg.dailyLimit) {
+            if (Storage.getTodayCount() >= cfg.dailyLimit) {
                 _log("今日上限达成，自动停止");
                 break;
             }
-            if (anti.isQuietNow(cfg)) {
+            if (Anti.isQuietNow(cfg)) {
                 _log("进入凌晨保护时段，停止");
                 break;
             }
@@ -100,16 +100,16 @@ function _runLoop() {
             } catch (e) {
                 _lastError = e;
                 _log("处理目标群失败: " + e.message);
-                try { nav.backToSourceGroup(cfg, _log); } catch (ee) {}
+                try { Nav.backToSourceGroup(cfg, _log); } catch (ee) {}
             }
 
             if (_state === STATE.STOPPED) break;
-            if (storage.getTodayCount() >= cfg.dailyLimit) {
+            if (Storage.getTodayCount() >= cfg.dailyLimit) {
                 _log("今日上限达成，自动停止");
                 break;
             }
 
-            const cooldown = anti.batchCooldown(cfg);
+            const cooldown = Anti.batchCooldown(cfg);
             _log("批次冷却 " + Math.round(cooldown / 1000) + " 秒");
             const startWait = Date.now();
             while (Date.now() - startWait < cooldown) {
@@ -129,29 +129,29 @@ function _runLoop() {
 }
 
 function _runOneTarget(cfg, target) {
-    nav.gotoSourceGroup(cfg, _log);
-    nav.openInvitePage(cfg, _log);
-    nav.collapseCreatedGroups(cfg, _log);
-    nav.expandJoinedGroups(cfg, _log);
-    nav.findAndEnterTarget(target, cfg, _log);
+    Nav.gotoSourceGroup(cfg, _log);
+    Nav.openInvitePage(cfg, _log);
+    Nav.collapseCreatedGroups(cfg, _log);
+    Nav.expandJoinedGroups(cfg, _log);
+    Nav.findAndEnterTarget(target, cfg, _log);
 
-    const remaining = cfg.dailyLimit - storage.getTodayCount();
+    const remaining = cfg.dailyLimit - Storage.getTodayCount();
     if (remaining <= 0) return;
 
-    const checked = select.checkBatch(cfg, remaining, _log);
+    const checked = Select.checkBatch(cfg, remaining, _log);
     if (checked === 0) {
         _log("一个都没勾选到，跳过");
-        nav.backToSourceGroup(cfg, _log);
+        Nav.backToSourceGroup(cfg, _log);
         return;
     }
 
-    select.submitInvite(cfg, _log);
-    const newTotal = storage.addTodayCount(checked);
+    Select.submitInvite(cfg, _log);
+    const newTotal = Storage.addTodayCount(checked);
     _emitProgress(newTotal, cfg.dailyLimit);
     _log("本批完成 +" + checked + "，今日累计 " + newTotal + "/" + cfg.dailyLimit);
 
-    anti.maybeJitter(cfg);
-    nav.backToSourceGroup(cfg, _log);
+    Anti.maybeJitter(cfg);
+    Nav.backToSourceGroup(cfg, _log);
 }
 
 module.exports = {

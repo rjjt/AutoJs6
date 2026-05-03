@@ -1,4 +1,4 @@
-const anti = require("./anti.js");
+const Anti = require("./Anti.js");
 
 const QQ_PKG = "com.tencent.mobileqq";
 const TIMEOUT_FAST = 5000;
@@ -44,13 +44,13 @@ function openInvitePage(cfg, log) {
                   || desc("邀请").findOne(TIMEOUT_FAST);
     if (!inviteBtn) throw new Error("找不到邀请按钮");
     safeClick(inviteBtn);
-    anti.actionDelay(cfg);
+    Anti.actionDelay(cfg);
 
     log("点击 从群聊中选择联系人");
     const fromGroup = text("从群聊中选择联系人").findOne(TIMEOUT_FAST);
     if (!fromGroup) throw new Error("找不到\"从群聊中选择联系人\"");
     safeClick(fromGroup);
-    anti.actionDelay(cfg);
+    Anti.actionDelay(cfg);
 }
 
 function collapseCreatedGroups(cfg, log) {
@@ -61,7 +61,7 @@ function collapseCreatedGroups(cfg, log) {
     }
     log("折叠 我创建的群聊");
     safeClick(created);
-    anti.actionDelay(cfg);
+    Anti.actionDelay(cfg);
 }
 
 function expandJoinedGroups(cfg, log) {
@@ -69,7 +69,7 @@ function expandJoinedGroups(cfg, log) {
     if (!joined) throw new Error("找不到\"我加入的群聊\"标题");
     log("展开 我加入的群聊");
     safeClick(joined);
-    anti.actionDelay(cfg);
+    Anti.actionDelay(cfg);
 }
 
 function findAndEnterTarget(targetName, cfg, log) {

@@ -1,6 +1,6 @@
-const storage = require("../core/storage.js");
-const engine = require("../core/engine.js");
-const floating = require("./floating.js");
+const Storage = require("../core/Storage.js");
+const Engine = require("../core/Engine.js");
+const Floating = require("./Floating.js");
 
 function buildLayout() {
     return (
@@ -77,7 +77,7 @@ function buildLayout() {
 function init() {
     ui.layout(buildLayout());
 
-    const cfg = storage.loadConfig();
+    const cfg = Storage.loadConfig();
 
     ui.versionLabel.setText("v0.1.0  " + new Date().toISOString().slice(0, 10));
     ui.sourceGroup.setText(cfg.sourceGroup || "");
@@ -97,7 +97,7 @@ function init() {
 
     ui.btnSave.click(function () {
         const c = readForm();
-        storage.saveConfig(c);
+        Storage.saveConfig(c);
         toast("已保存");
         renderProgress();
     });
@@ -106,7 +106,7 @@ function init() {
         const c = readForm();
         if (!c.sourceGroup) { toast("请填源群名称"); return; }
         if (c.targetGroups.length === 0) { toast("请填至少一个目标群"); return; }
-        storage.saveConfig(c);
+        Storage.saveConfig(c);
 
         if (!auto.service) {
             toast("请先开启无障碍服务");
@@ -119,8 +119,8 @@ function init() {
             return;
         }
 
-        floating.show({});
-        engine.start();
+        Floating.show({});
+        Engine.start();
         toast("开始运行 - 切到 QQ，悬浮窗会跟着你");
     });
 
@@ -132,7 +132,7 @@ function init() {
     ui.btnResetToday.click(function () {
         dialogs.confirm("确认清空今日已邀请记录？").then(function (yes) {
             if (yes) {
-                storage.resetToday();
+                Storage.resetToday();
                 renderProgress();
                 toast("已清空");
             }
@@ -149,12 +149,12 @@ function readForm() {
     return {
         sourceGroup: String(ui.sourceGroup.getText() || "").trim(),
         targetGroups: targets,
-        batchSize: parseInt(ui.batchSize.getText()) || storage.DEFAULTS.batchSize,
-        batchIntervalMin: parseFloat(ui.batchIntervalMin.getText()) || storage.DEFAULTS.batchIntervalMin,
-        batchIntervalMax: parseFloat(ui.batchIntervalMax.getText()) || storage.DEFAULTS.batchIntervalMax,
-        dailyLimit: parseInt(ui.dailyLimit.getText()) || storage.DEFAULTS.dailyLimit,
-        actionDelayMin: parseFloat(ui.actionDelayMin.getText()) || storage.DEFAULTS.actionDelayMin,
-        actionDelayMax: parseFloat(ui.actionDelayMax.getText()) || storage.DEFAULTS.actionDelayMax,
+        batchSize: parseInt(ui.batchSize.getText()) || Storage.DEFAULTS.batchSize,
+        batchIntervalMin: parseFloat(ui.batchIntervalMin.getText()) || Storage.DEFAULTS.batchIntervalMin,
+        batchIntervalMax: parseFloat(ui.batchIntervalMax.getText()) || Storage.DEFAULTS.batchIntervalMax,
+        dailyLimit: parseInt(ui.dailyLimit.getText()) || Storage.DEFAULTS.dailyLimit,
+        actionDelayMin: parseFloat(ui.actionDelayMin.getText()) || Storage.DEFAULTS.actionDelayMin,
+        actionDelayMax: parseFloat(ui.actionDelayMax.getText()) || Storage.DEFAULTS.actionDelayMax,
         quietHours: !!ui.quietHours.isChecked(),
         quietStart: parseInt(ui.quietStart.getText()) || 0,
         quietEnd: parseInt(ui.quietEnd.getText()) || 7,
@@ -162,8 +162,8 @@ function readForm() {
 }
 
 function renderProgress() {
-    const cfg = storage.loadConfig();
-    const cur = storage.getTodayCount();
+    const cfg = Storage.loadConfig();
+    const cur = Storage.getTodayCount();
     ui.progressLabel.setText("今日已邀请 " + cur + " / " + cfg.dailyLimit);
 }
 

@@ -1,4 +1,4 @@
-const engine = require("../core/engine.js");
+const Engine = require("../core/Engine.js");
 
 let _win = null;
 
@@ -34,31 +34,31 @@ function show(opts) {
     _setupDrag();
 
     _win.btnPlay.click(function () {
-        const s = engine.getState();
-        if (s === engine.STATE.RUNNING) {
-            engine.pause();
-        } else if (s === engine.STATE.PAUSED) {
-            engine.resume();
+        const s = Engine.getState();
+        if (s === Engine.STATE.RUNNING) {
+            Engine.pause();
+        } else if (s === Engine.STATE.PAUSED) {
+            Engine.resume();
         } else {
-            engine.start();
+            Engine.start();
         }
     });
 
     _win.btnStop.click(function () {
-        engine.stop();
+        Engine.stop();
     });
 
     _win.btnSettings.click(function () {
         if (opts.onSettings) opts.onSettings();
     });
 
-    engine.setFloating({
+    Engine.setFloating({
         onState: function (s) { _renderState(s); },
         onProgress: function (n, lim) { _renderProgress(n, lim); },
         onLog: function (msg) {},
     });
 
-    _renderState(engine.getState());
+    _renderState(Engine.getState());
     return _win;
 }
 

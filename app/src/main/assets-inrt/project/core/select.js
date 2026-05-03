@@ -1,4 +1,4 @@
-const anti = require("./anti.js");
+const Anti = require("./Anti.js");
 
 const TIMEOUT_FAST = 4000;
 
@@ -31,7 +31,7 @@ function checkBatch(cfg, remaining, log) {
                 checkedSet[c.key] = true;
                 checked++;
                 progressedThisPass = true;
-                anti.actionDelay(cfg);
+                Anti.actionDelay(cfg);
             }
         }
 
@@ -40,7 +40,7 @@ function checkBatch(cfg, remaining, log) {
         const w = device.width || 1080;
         const h = device.height || 1920;
         swipe(w / 2, h * 0.75, w / 2, h * 0.35, 500);
-        sleep(anti.randInt(700, 1300));
+        sleep(Anti.randInt(700, 1300));
         scrollRounds++;
         if (!progressedThisPass) {
         }
