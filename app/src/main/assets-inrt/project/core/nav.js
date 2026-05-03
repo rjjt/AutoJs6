@@ -1,4 +1,4 @@
-const Anti = require("./Anti.js");
+const Anti = require("./anti.js");
 
 const QQ_PKG = "com.tencent.mobileqq";
 const TIMEOUT_FAST = 5000;

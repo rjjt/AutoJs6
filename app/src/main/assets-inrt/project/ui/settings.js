@@ -1,6 +1,6 @@
-const Storage = require("../core/Storage.js");
-const Engine = require("../core/Engine.js");
-const Floating = require("./Floating.js");
+const Storage = require("../core/storage.js");
+const Engine = require("../core/engine.js");
+const Floating = require("./floating.js");
 
 function buildLayout() {
     return (

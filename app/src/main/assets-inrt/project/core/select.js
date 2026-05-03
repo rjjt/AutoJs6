@@ -1,4 +1,4 @@
-const Anti = require("./Anti.js");
+const Anti = require("./anti.js");
 
 const TIMEOUT_FAST = 4000;
 

@@ -1,7 +1,7 @@
-const Storage = require("./Storage.js");
-const Anti = require("./Anti.js");
-const Nav = require("./Nav.js");
-const Select = require("./Select.js");
+const Storage = require("./storage.js");
+const Anti = require("./anti.js");
+const Nav = require("./nav.js");
+const Select = require("./select.js");
 
 const STATE = { IDLE: "IDLE", RUNNING: "RUNNING", PAUSED: "PAUSED", STOPPED: "STOPPED" };
 

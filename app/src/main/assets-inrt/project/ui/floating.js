@@ -1,4 +1,4 @@
-const Engine = require("../core/Engine.js");
+const Engine = require("../core/engine.js");
 
 let _win = null;
 
