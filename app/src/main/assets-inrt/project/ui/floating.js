@@ -1,4 +1,5 @@
 const Engine = require("../core/engine.js");
+const Perms = require("../core/perms.js");
 
 let _win = null;
 
@@ -6,7 +7,7 @@ function show(opts) {
     opts = opts || {};
     if (_win) return _win;
 
-    if (!floaty.checkPermission()) {
+    if (!Perms.canDrawOverlays()) {
         toast("缺少悬浮窗权限");
         return null;
     }

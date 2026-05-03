@@ -1,6 +1,7 @@
 const Storage = require("../core/storage.js");
 const Engine = require("../core/engine.js");
 const Floating = require("./floating.js");
+const Perms = require("../core/perms.js");
 
 function buildLayout() {
     return (
@@ -108,14 +109,14 @@ function init() {
         if (c.targetGroups.length === 0) { toast("请填至少一个目标群"); return; }
         Storage.saveConfig(c);
 
-        if (!auto.service) {
+        if (!Perms.hasAccessibility()) {
             toast("请先开启无障碍服务");
-            app.startActivity({ action: "android.settings.ACCESSIBILITY_SETTINGS" });
+            Perms.requestAccessibility();
             return;
         }
-        if (!floaty.checkPermission()) {
+        if (!Perms.canDrawOverlays()) {
             toast("请先授予悬浮窗权限");
-            floaty.requestPermission();
+            Perms.requestOverlay();
             return;
         }
 
@@ -168,8 +169,8 @@ function renderProgress() {
 }
 
 function renderPerms() {
-    const a11y = !!auto.service;
-    const flo = floaty.checkPermission();
+    const a11y = Perms.hasAccessibility();
+    const flo = Perms.canDrawOverlays();
     ui.permsLabel.setText(
         (a11y ? "✅" : "❌") + " 无障碍服务   " +
         (flo ? "✅" : "❌") + " 悬浮窗权限"
