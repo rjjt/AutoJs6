@@ -534,7 +534,10 @@ android {
             // @Reference to kkevsekk1/AutoX (https://github.com/kkevsekk1/AutoX) by SuperMonster003 on Nov 16, 2023.
             //  ! https://github.com/kkevsekk1/AutoX/blob/a6d482189291b460c3be60970b74c5321d26e457/inrt/build.gradle.kts#L93
             // noinspection ChromeOsAbiSupport
-            ndk.abiFilters += ""
+            // Include 64-bit ARM only (covers all modern Android phones since ~2019).
+            // Adding empty string here means "no ABIs" which strips libjackpal-termexec2.so etc.
+            // and crashes the inrt APK at startup with UnsatisfiedLinkError.
+            ndk.abiFilters += setOf("arm64-v8a")
         }
 
         androidResources {
